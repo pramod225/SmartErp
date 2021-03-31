@@ -1,0 +1,310 @@
+﻿@using YuktiSolutions.SmartERP.Areas.Sales.Models.Database
+@model YuktiSolutions.SmartERP.Areas.Sales.Models.Database.LeadModel
+@using YuktiSolutions.SmartERP.Areas.Sales.Models.UI
+@{
+    ViewBag.Title = "Leads";
+}
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/smarterp/Sales.lead.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+    <script src="~/Scripts/smarterp/user.administration.js"></script>
+    <script src="~/Scripts/smarterp/sales.activities.js"></script>
+}
+<h2>Leads</h2>
+<div class="pull-left">
+    <div class="form-group has-feedback">
+        <input type="text" class="form-control" id="txtSearch" placeholder="Search" onchange="BindGrid();" name="search">
+        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+    </div>
+</div>
+<div class="pull-right">
+    <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-primary"> Add New Lead</button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-option-vertical"></span> More options
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="@Url.Action("" +"Leads_Delete","" +"Leads",new {Area="Sales" })" onclick="BulkAction(event, this, 'LeadsList', 'Select at least one lead to delete.', 'Are you sure you want to delete the selected leads?');"> Delete Selected</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#AssignUserModal"> Assign To</a></li>
+        </ul>
+    </div>
+</div>
+<div class="clearfix"></div>
+
+@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.LeadListItem>
+    ().Name("LeadsList")
+    .Filterable()
+    .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+    .Sortable()
+    .Scrollable(e=>e.Height(300))
+    .Columns(cols=>
+    { 
+        cols.Template(c => c.ID).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:ID#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"LeadsList\")' />").Width(50).Lockable(false);
+            cols.Bound(c => c.Name).ClientTemplate(Html.ActionLink("#:Name#", "View", "Leads", new { area = "Sales", id = "#:ID#" }, new { }).ToHtmlString()).Width(200);
+            cols.Bound(c => c.Name).ClientTemplate(
+    "<a class='btn btn-sm dropdown-toggle' data-toggle='dropdown'> <i class='glyphicon glyphicon-option-vertical'> </i> </a> " +
+    "<ul class='dropdown-menu' role='menu'>" +
+    "<li><a href='\\#' onclick='EditLead(event,this);'>Edit</a></li>" +
+    "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+                "<li><a href='\\#' onclick='OnEmailSave(event,this)'>Email</a></li>" +
+                "<li><a href='\\#' onclick='OnTaskSave(event,this)'>Task</a></li>" +
+                "<li><a href='\\#' onclick='OnCallSave(event,this)'>Call</a></li>" +
+                "<li><a href='\\#' onclick='OnEventSave(event,this)'>Event<a></li>" +
+    "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Width(50).Lockable(false);
+
+            cols.Bound(c => c.CompanyName).Width(200);
+            cols.Bound(c => c.Designation).Width(200);
+            cols.Bound(c => c.PhoneNumber).Width(200);
+            cols.Bound(c => c.Email).Width(300);
+            cols.Bound(c => c.MobileNumber).Hidden(true);
+            cols.Bound(c => c.Assigned_To).Width(200);
+            cols.Bound(c => c.StateProvince).Width(200);
+            cols.Bound(c => c.CountryName).Width(200);
+            cols.Bound(c => c.LeadSourceName).Width(200);
+            cols.Bound(c => c.Owner).Width(200);
+            cols.Bound(c => c.CreatedByName).Width(200);
+            cols.Bound(c => c.ModifiedByName).Width(200);
+
+            cols.Bound(c => c.Skype).Hidden(true);
+
+        }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Leads_Read","Leads",new { Area="Sales"}).Data("GetAdditionData")).PageSize(25))
+    )
+
+
+@Html.Partial("_EmailView", new EmailActivityListItem { Id = Guid.NewGuid() })
+@Html.Partial("_CallView", new CallActivityListItem { Id = Guid.NewGuid() })
+@Html.Partial("_EventView", new EventActivityListItem { Id = Guid.NewGuid() })
+@Html.Partial("_TaskView", new TaskActivityListItem { Id = Guid.NewGuid() })
+
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Ajax.BeginForm("SaveLead", "Leads", new { }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnLeadSaved" }, new { id = "leadForm" }))
+            {
+                @Html.HiddenFor(m => m.ID)
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="form-horizontal ">
+                            <button type="button" class="glyphicon glyphicon-remove" onclick="ResetData()" style="color:blue;float:right;padding: 0;border: none;background: none;outline:none" data-dismiss="modal"></button>
+                            <h4>Lead Information</h4>
+                            <p>Fields Marked  *  are Mandatory</p>
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            @Html.LabelFor(x => x.Title)
+                                            @Html.DropDownListFor(model => model.Title, MasterEntriesManager.GetMasterEntries(MasterEntryType.Title).Select(x => new SelectListItem { Text = x.Name, Value = x.ID.ToString() }), "Title", new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-md-5">
+                                            @Html.Label("First Name*")
+                                            @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control", @placeholder = "First Name" } })
+                                            @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-md-5 ">
+                                            @Html.Label("Last Name*")
+                                            @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Last Name" } })
+                                            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-8">
+
+                                    <div class="form-group row">
+                                        <div class="col-lg-12">
+                                            @Html.Label("Company")
+                                            @Html.EditorFor(model => model.CompanyName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Company Name" } })
+                                            @Html.ValidationMessageFor(model => model.CompanyName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-lg-6">
+                                            @Html.Label("Designation")
+                                            @Html.EditorFor(model => model.Designation, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Designation" } })
+                                            @Html.ValidationMessageFor(model => model.Designation, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-lg-6">
+                                            @Html.Label("MobileNumber")
+                                            @Html.EditorFor(model => model.MobileNumber, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Mobile Number" } })
+                                            @Html.ValidationMessageFor(model => model.MobileNumber, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-lg-12">
+                                            @Html.Label("Email")
+                                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Email" } })
+                                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-lg-5">
+                                            @Html.LabelFor(x => x.LeadSource)
+                                            @Html.DropDownListFor(model => model.LeadSource, MasterEntriesManager.GetMasterEntries(MasterEntryType.LeadSources).Select(x => new SelectListItem
+                                       {
+                                           Text = x.Name,
+                                           Value = x.ID.ToString()
+                                       }), "Select Lead Source", new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.LeadSource, "", new { @class = "text-danger" })
+                                        </div>
+
+                                        <div class="col-lg-7">
+                                            @Html.LabelFor(x => x.Rating)
+                                            @Html.DropDownListFor(model => model.Rating, MasterEntriesManager.GetMasterEntries(MasterEntryType.Ratings).Select(x => new SelectListItem
+                                       {
+                                           Text = x.Name,
+                                           Value = x.ID.ToString()
+                                       }), "Select Rating", new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Rating, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group row">
+                                        <div class="col-lg-12">
+                                            @Html.Label("Skype")
+                                            @Html.EditorFor(model => model.Skype, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Skype Id" } })
+                                            @Html.ValidationMessageFor(model => model.Skype, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-lg-8">
+                                            @Html.Label("PhoneNumber")
+                                            @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Phone Number" } })
+                                            @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            @Html.Label("Extension")
+                                            @Html.EditorFor(model => model.Extension, new { htmlAttributes = new { @class = "form-control", @placeholder = "Extension" } })
+                                            @Html.ValidationMessageFor(model => model.Extension, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class=" col-lg-12">
+                                            @Html.Label("NoOfEmployees")
+                                            @Html.EditorFor(model => model.NoOfEmployees, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Employees Number" } })
+                                            @Html.ValidationMessageFor(model => model.NoOfEmployees, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-lg-12">
+                                            @Html.LabelFor(x => x.Industry)
+                                            @Html.DropDownListFor(model => model.Industry, MasterEntriesManager.GetMasterEntries(MasterEntryType.Industry).Select(x => new SelectListItem
+                                       {
+                                           Text = x.Name,
+                                           Value = x.ID.ToString()
+                                       }), "Select Industry", new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Industry, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class=" col-lg-10">
+                                        @Html.Label("Messege")
+                                        @Html.EditorFor(model => model.Messege, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Messege" } })
+                                        @Html.ValidationMessageFor(model => model.Messege, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    <hr />
+                                    <h2>Address </h2>
+                                </div>
+
+                                <div class="col-lg-8">
+                                    <div class="form-group row">
+                                        <div class="col-lg-12">
+                                            @Html.Label("Street")
+                                            @Html.EditorFor(model => model.Street, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Street" } })
+                                            @Html.ValidationMessageFor(model => model.Street, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-lg-6">
+                                            @Html.Label("City")
+                                            @Html.EditorFor(model => model.City, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter City" } })
+                                            @Html.ValidationMessageFor(model => model.City, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-lg-6">
+                                            @Html.Label("StateProvince")
+                                            @Html.EditorFor(model => model.StateProvince, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter State/Province" } })
+                                            @Html.ValidationMessageFor(model => model.StateProvince, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-lg-6">
+                                            @Html.LabelFor(x => x.Country)
+                                            @Html.DropDownListFor(model => model.Country, CountryManager.GetCountries().Select(x => new SelectListItem
+                                       {
+                                           Text = x.CountryName,
+                                           Value = x.ID.ToString()
+                                       }), "Select Country", new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-lg-4">
+                                            @Html.Label("ZipCode")
+                                            @Html.EditorFor(model => model.ZipCode, new { htmlAttributes = new { @class = "form-control", @placeholder = "Zip Code" } })
+                                            @Html.ValidationMessageFor(model => model.ZipCode, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row ">
+                                        <div class="col-md-12">
+                                            <input type="submit" value="Save Lead" class="btn btn-primary col-lg-push-6" />
+                                            <button type="button" class="btn btn-default col-lg-push-4" data-dismiss="modal" onclick="ResetData()" aria-hidden="true" style="outline:none;margin: 5px;border: 2px solid #337ab7;color: #337ab7;">Close</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+<div id="AssignUserModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Assign Users</h4>
+            </div>
+            <div class="modal-body">
+                <div class="pull-left">
+                    <div class="form-group has-feedback">
+                        <input type="text" class="form-control" id="txtuserSearch" placeholder="Search" onchange="BindUserGrid();" name="search">
+                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                    </div>
+                </div><br /><hr /><div>
+                    @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Models.ApplicationUser>().Name("AspNetUsers")
+                    .Pageable()
+                    .Sortable()
+                    .Filterable()
+                    .Columns(cols=> {
+        cols.Bound(c => c.UserName).ClientTemplate("<a href='\\#' onclick='EditUserLead(event,this)'>#:UserName#</a>");
+        cols.Bound(c => c.Email);
+        cols.Bound(c => c.PhoneNumber);
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Users_Read","Users",new { Area=""}).Data("GetAdditionalUserData") ))
+)
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

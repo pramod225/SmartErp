@@ -1,0 +1,78 @@
+﻿
+@model YuktiSolutions.SmartERP.Areas.Sales.Models.UI.EventActivityListItem
+@{
+    ViewBag.Title = "Event";
+}
+<div id="eventModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Ajax.BeginForm("SaveActivity", "Activities", new { Area = "Sales", ActivityType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.ActivityType.Event }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnEventSave" }, new { id = "eventForm" }))
+            {
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(m => m.StartDateTime)
+                @Html.HiddenFor(m => m.EndDateTime)
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <button type="button" class="glyphicon glyphicon-remove" onclick="OnResetEvent()" style="color: #337ab7;float:right;padding: 0;border: none;background: none;outline:none;" data-dismiss="modal"></button>
+                        <center><h3>Event Details</h3></center>
+                        <div class="form-horizontal ">
+                            <div class="form-group row">
+                                <div class="col col-lg-12">
+                                    @Html.Label("Subject")
+                                    @Html.EditorFor(model => model.Subject, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Subject" } })
+                                    @Html.ValidationMessageFor(model => model.Subject, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col col-lg-12">
+                                    @Html.Label("Description")
+                                    @Html.TextAreaFor(model => model.Description, 4, 75, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Description" } })
+                                    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col col-lg-12">
+                                    @Html.Label("Start Date ")
+                                    @(Html.Kendo().DatePicker()
+                                    .Events(e=> e.Change("SetStartDate"))
+                                    .Name("startDatePicker")
+                                    .Value(DateTime.Now)
+                                      )
+
+                                    @Html.ValidationMessageFor(model => model.StartDateTime, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col col-lg-12">
+                                    @Html.Label("End Date ")
+                                    @(Html.Kendo().DatePicker()
+                                    .Events(e=> e.Change("SetEndDate"))
+                                    .Name("endDatePicker")
+                                    .Value(DateTime.Now)
+                                      )
+                                    @Html.ValidationMessageFor(model => model.EndDateTime, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col col-lg-12">
+                                    @Html.Label("Location")
+                                    @Html.EditorFor(model => model.Location, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Location" } })
+                                    @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group row ">
+                                <div class="col-md-12">
+                                    <input type="submit" value="Save Details" onclick="DateCheck()" class="btn btn-primary col-lg-push-6" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+

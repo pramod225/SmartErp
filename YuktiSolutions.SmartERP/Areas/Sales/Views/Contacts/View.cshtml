@@ -1,0 +1,151 @@
+﻿@model YuktiSolutions.SmartERP.Areas.Sales.Models.UI.ContactListItem
+
+@{
+    ViewBag.Title = "ViewContact";
+}
+<h3>@Html.ActionLink("Back", "Index")</h3>
+<center><h2>View Contact</h2></center>
+<hr />
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class=" row">
+                <div class="col-lg-8">
+                    @Html.Label("Account ")
+                    <div class="form-group">
+                        @Html.DisplayFor(m => m.AccountName, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class=" col-lg-8">
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(m => m.Title)
+                    <div>
+                        @Html.DisplayFor(m => m.TitleName, new { @class = "form-control" })
+                    </div>
+
+                </div>
+                <div class="col-lg-3">
+                    @Html.Label("First Name")
+                    <div>
+                        @Html.DisplayFor(m => m.FirstName, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    @Html.Label("Last Name")
+                    <div>
+                        @Html.DisplayFor(m => m.LastName, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class=" form-group row">
+                <div class="col-lg-6">
+                    @Html.Label("Designation")
+                    <div>
+                        @Html.DisplayFor(m => m.Designation, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class=" col-lg-6">
+                    @Html.Label("Mobile Number")
+                    <div>
+                        @Html.DisplayFor(m => m.MobileNo, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-12">
+                    @Html.Label("Email")
+                    <div>
+                        @Html.DisplayFor(m => m.EmailId, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="form-group row">
+                <div class="col-lg-12">
+                    @Html.Label("Skype ID")
+                    <div>
+                        @Html.DisplayFor(m => m.SkypeId, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-6">
+                    @Html.Label("Phone Number")
+                    <div>
+                        @Html.DisplayFor(m => m.PhoneNo, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class=" col-lg-6">
+                    @Html.Label("Extension")
+                    <div>
+                        @Html.DisplayFor(m => m.Extension, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-12">
+                    @Html.Label("WhatsApp")
+                    <div>
+                        @Html.DisplayFor(m => m.WhatsApp, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <hr />
+            <h3>Other Details</h3>
+            <div class="form-group row">
+                <div class="col-lg-4">
+                    @Html.Label("Linkedin Profile")
+                    <div>
+                        @Html.DisplayFor(m => m.LinkdinProfile, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-6">
+                    @Html.Label("Created By")
+                    <div>
+                        @Html.DisplayFor(m => m.CreatedByName, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    @Html.Label("Created On")
+                    <div>
+                        @Html.DisplayFor(m => m.CreatedOn, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-6">
+                    @Html.Label("Modified By ")
+                    <div>
+                        @Html.DisplayFor(m => m.ModifiedByName, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    @Html.Label("Modified On")
+                    <div>
+                        @Html.DisplayFor(m => m.ModifiedOn, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-189324347-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'UA-189324347-1');
+</script>
+

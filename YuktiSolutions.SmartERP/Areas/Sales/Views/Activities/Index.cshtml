@@ -1,0 +1,205 @@
+﻿@using YuktiSolutions.SmartERP.Areas.Sales.Models.Database
+@using YuktiSolutions.SmartERP.Areas.Sales.Models.UI
+@model YuktiSolutions.SmartERP.Areas.Sales.Models.Database.ActivityModel
+@{
+    ViewBag.Title = "Index";
+}
+
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+    <script src="~/Scripts/smarterp/user.administration.js"></script>
+    <script src="~/Scripts/smarterp/sales.activities.js"></script>
+}
+<h2>Activities</h2>
+
+<div class="pull-left">
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            Activity list <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li><a data-value="Email">Email Activity</a></li>
+            <li><a data-value="Task">Task Activity</a></li>
+            <li><a data-value="Event">Event Activity</a></li>
+            <li><a data-value="Call">Call Activity</a></li>
+        </ul>
+    </div>
+</div>
+<div class="pull-right">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-option-vertical"></span> More options
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="#" data-toggle="modal" data-target="#AssignUserModal"> Assign To</a></li>
+        </ul>
+    </div>
+</div> 
+<div class="clearfix"></div>
+
+<div id="Event" style="display:none">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Event Activity</h3>
+        </div>
+        @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.EventActivityListItem>
+           ().Name("EventList")
+           .Filterable()
+           .Sortable()
+           .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+           .Scrollable(e=>e.Height(200))
+           .Columns(cols=>
+           {
+               cols.Template(c => c.Id).Width(50).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"EventList\")' />");
+
+               cols.Bound(c => c.Subject).Width(200).Lockable(false);
+               cols.Bound(c => c.Subject).ClientTemplate(
+               "<a  class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+               "<ul class='dropdown-menu' role='menu'>" +
+               "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+               "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Width(50).Lockable(false);
+               cols.Bound(c => c.Description).Width(200);
+               cols.Bound(c => c.StartDateTime).Width(200);
+               cols.Bound(c => c.DueDate).Hidden(true).Width(200);
+               cols.Bound(c => c.EndDateTime).Width(200);
+               cols.Bound(c => c.Assign_To).Width(200);
+               cols.Bound(c => c.RelatedAccounts).Width(200);
+               cols.Bound(c => c.Location).Width(200);
+               cols.Bound(c => c.Status).Hidden(true).Width(200);
+               cols.Bound(c => c.CreatedByName).Width(200);
+               cols.Bound(c => c.ModifiedByName).Width(200);
+
+           }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Event_Read","Home",new { Area="Sales"})).PageSize(25)))
+        </div>
+    </div>
+    <div id="Email" style="display:none">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Email Activity</h3>
+            </div>
+    @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.EmailActivityListItem>
+    ().Name("EmailList")
+    .Filterable()
+    .Sortable()
+    .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+    .Scrollable(e=>e.Height(200))
+    .Columns(cols=>
+    {
+        cols.Template(c => c.Id).Width(50).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"EventList\")' />");
+
+        cols.Bound(c => c.Subject).Width(200).Lockable(false);
+        cols.Bound(c => c.Subject).ClientTemplate(
+                "<a  class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+                "<ul class='dropdown-menu' role='menu'>" +
+                "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+                "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Width(50).Lockable(false);
+        cols.Bound(c => c.Description).Width(200);
+        cols.Bound(c => c.Assign_To).Hidden(true).Width(200);
+        cols.Bound(c => c.CreatedByName).Width(200);
+        cols.Bound(c => c.ModifiedByName).Width(200);
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Email_Read", "Home",new { Area="Sales"})).PageSize(25)))
+        </div>
+    </div>
+    <div id="Task" style="display:none">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Task Activity</h3>
+            </div>
+            @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.TaskActivityListItem>
+            ().Name("TaskList")
+            .Filterable(e => e.ToString().Trim(' '))
+            .Scrollable()
+            .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+            .Scrollable(e=>e.Height(200))
+            .Columns(cols =>{
+                cols.Template(c => c.Id).Width(50).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"EventList\")' />");
+                cols.Bound(c => c.Subject).Width(200).Lockable(false);
+                cols.Bound(c => c.Subject).ClientTemplate(
+                "<a  class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+                "<ul class='dropdown-menu' role='menu'>" +
+                "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+                "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Width(50).Lockable(false);
+                cols.Bound(c => c.Description).Width(200);
+                cols.Bound(c => c.DueDate).Width(200);
+                cols.Bound(c => c.Assign_To).Hidden(true).Width(200);
+                cols.Bound(c => c.Status).Width(200);
+                cols.Bound(c => c.CreatedByName).Width(200);
+                cols.Bound(c => c.ModifiedByName).Width(200);
+            }).DataSource(ds => ds.Ajax().Read(read => read.Action("Task_Read", "Home", new { Area = "Sales" })).PageSize(25)))
+        </div>
+    </div>
+    <div id="Call" style="display:none">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Call Activity</h3>
+            </div>
+            @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.CallActivityListItem>
+            ().Name("CallList")
+            .Filterable(e => e.ToString().Trim(' '))
+            .Sortable()
+            .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+            .Scrollable(e=>e.Height(200))
+            .Columns(cols =>{
+
+                cols.Template(c => c.Id).Width(50).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"EventList\")' />");
+
+                cols.Bound(c => c.Subject).Width(200).Lockable(false);
+                cols.Bound(c => c.Subject).ClientTemplate(
+                "<a  class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+                "<ul class='dropdown-menu' role='menu'>" +
+                "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+                "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Filterable(false).Width(50).Lockable(false);
+
+                cols.Bound(c => c.Description).Width(200);
+                cols.Bound(c => c.Assign_To).Hidden(true).Width(200);
+                cols.Bound(c => c.CreatedByName).Width(200);
+                cols.Bound(c => c.ModifiedByName).Width(200);
+            }).DataSource(ds => ds.Ajax().Read(read => read.Action("Call_Read", "Home", new { Area = "Sales" })).PageSize(25)))
+        </div>
+    </div>
+
+
+    <div id="AssignUserModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Assign Contact</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="pull-left">
+                        <div class="form-group has-feedback">
+                            <input type="text" class="form-control" id="txtuserSearch" placeholder="Search" onchange="BindContactGrid();" name="search">
+                            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        </div>
+                    </div><br /><hr /><div>
+
+    @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.ContactListItem>
+    ().Name("AspNetUsers")
+    .Filterable()
+    .Sortable()
+    .Scrollable(e=>e.Height(300))
+    .Columns(cols=>
+    {
+
+        cols.Bound(c => c.TitleName).Hidden(true);
+        cols.Bound(c => c.Name).Width(200);
+        cols.Bound(c => c.EmailId).Width(200).ClientTemplate("<a href='\\#' onclick='EditUserActivity(event,this)'>#:EmailId#</a>");
+        //cols.Bound(c => c.MobileNo).Width(150);
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Contacts_Read","Contacts",new { Area="Sales"}).Data("GetAdditionData"))))
+    
+   
+
+</div>
+          </div>
+             <div class="modal-footer">
+               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+             </div>
+            </div>
+        </div>
+    </div>

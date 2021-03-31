@@ -1,0 +1,15 @@
+﻿@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.MasterEntriesListItem>
+        ().Name("RatingList")
+        .Columns(cols =>
+        {
+      cols.Bound(c => c.Name).FooterTemplate("<input type='text' id ='footerRatingName' placeholder='Enter Rating' size='45'  class='k-textbox' />");
+                   ;
+       cols.Command(command => { command.Edit(); command.Destroy(); }).Width(250).FooterTemplate("<a onclick='SaveRating()'><span class='glyphicon glyphicon-plus pull-right'></span></a>");
+               })
+          .Editable(editable => editable.Mode(GridEditMode.InLine))
+            .DataSource(ds => ds.Ajax().Read(read => read.Action("MasterEntries_Read", "Masters", new { Area = "Sales", MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.Ratings }))
+             .Events(e => e.Error("DataSourceError"))
+            .Model(m => m.Id(e => e.ID))
+           .Update(update => update.Action("MasterEntries_Update", "Masters", new { Area = "Sales" , MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.Ratings}))
+            .Destroy(destroy => destroy.Action("MasterEntries_Destroy", "Masters", new { Area = "Sales", MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.Ratings })))
+    )

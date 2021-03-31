@@ -1,0 +1,209 @@
+﻿@model YuktiSolutions.SmartERP.Areas.Sales.Models.UI.LeadListItem
+
+@{
+
+    ViewBag.Title = "ViewLead";
+}
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+<h3>@Html.ActionLink("Back", "Index")</h3>
+<center><h2>View Leads</h2></center>
+<table class="table" id="lead">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10">
+                <div class=" form-group row ">
+                    <div class="col-lg-2">
+                        @Html.Label("Title")
+                        <div>
+                            @Html.DisplayFor(m => m.TitleName, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        @Html.Label("First Name")
+                        <div>
+                            @Html.DisplayFor(m => m.FirstName, new { @class = "form-control" })
+                        </div>
+
+                    </div>
+                    <div class="col-lg-3">
+                        @Html.Label("Last Name")
+                        <div>
+                            @Html.DisplayFor(m => m.LastName, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="form-group row">
+                    <div class=" col-lg-8">
+                        @Html.Label("Company ")
+                        <div>
+                            @Html.DisplayFor(m => m.CompanyName, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group row">
+                            <div class=" col-lg-6">
+                                @Html.Label("Designation")
+                                <div>
+                                    @Html.DisplayFor(m => m.Designation, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                @Html.Label("Mobile Number")
+                                <div>
+                                    @Html.DisplayFor(m => m.MobileNumber, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class=" col-lg-8">
+                                @Html.LabelFor(m => m.Email)
+                                <div>
+                                    @Html.DisplayFor(m => m.Email, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class=" col-lg-6">
+                                @Html.Label("Lead Source")
+                                <div>
+                                    @Html.DisplayFor(m => m.LeadSourceName, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                @Html.Label("Rating")
+                                <div>
+                                    @Html.DisplayFor(m => m.RatingName, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group row">
+                            <div class="col-lg-12">
+                                @Html.Label("Skype")
+                                <div>
+                                    @Html.DisplayFor(m => m.Skype, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                @Html.Label("Phone Number")
+                                <div>
+                                    @Html.DisplayFor(m => m.PhoneNumber, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                @Html.Label("Extension")
+                                <div>
+                                    @Html.DisplayFor(m => m.Extension, new { @class = "form-control" })
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-6">
+                                @Html.LabelFor(m => m.NoOfEmployees)
+                                <div>
+                                    @Html.DisplayFor(m => m.NoOfEmployees, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                @Html.Label("Industry")
+                                <div>
+                                    @Html.DisplayFor(m => m.IndustryName, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <h3>Other Details</h3>
+        <div class="form-group row">
+            <div class="col-lg-8">
+                @Html.Label("Street")
+                <div>
+                    @Html.DisplayFor(m => m.Street, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-lg-4">
+                @Html.Label("City")
+                <div>
+                    @Html.DisplayFor(m => m.City, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-lg-4">
+                @Html.Label("StateProvince")
+                <div>
+                    @Html.DisplayFor(m => m.StateProvince, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-lg-4">
+                @Html.Label("Country")
+                <div>
+                    @Html.DisplayFor(m => m.CountryName, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-lg-3">
+                @Html.Label("Zip Code")
+                <div>
+                    @Html.DisplayFor(m => m.ZipCode, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-lg-6">
+                @Html.Label("Created By ")
+                <div>
+                    @Html.DisplayFor(m => m.CreatedByName, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-lg-6">
+                @Html.Label("Created On")
+                <div>
+                    @Html.DisplayFor(m => m.CreatedOn, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-lg-6">
+                @Html.Label("Modified By")
+                <div>
+                    @Html.DisplayFor(m => m.ModifiedByName, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-lg-6">
+                @Html.Label("Modified On")
+                <div>
+                    @Html.DisplayFor(m => m.ModifiedOn, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+    </div>
+</table>
+<script>
+    $(document).ready(function () {
+        $.getJSON("http://localhost:62406/api/leadApi/", function (data) {
+            $.each(data, function (key, value) {
+                
+                $("#lead").append(row);
+            });
+        });
+    })
+</script>
+
+
+
+  
+

@@ -1,0 +1,152 @@
+﻿@model YuktiSolutions.SmartERP.Areas.Sales.Models.UI.OpportunityListItem
+
+
+
+@{
+    ViewBag.Title = "View";
+}
+
+<h3>@Html.ActionLink("Back", "Index")</h3>
+<center><h2>View Opportunity</h2></center>
+<hr />
+
+<div class="container">
+    <div class="form-group row">
+        <div class="col-lg-8">
+
+            @Html.Label("Opportunity")
+            <div>
+                @Html.DisplayFor(m => m.OpportunityName, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-8">
+            @Html.Label("Account")
+            <div>
+                @Html.DisplayFor(m => m.AccountName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Close Date")
+            <div>
+                @Html.DisplayFor(m => m.CloseDate, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-4">
+            @Html.Label("Primary Campaign Source ")
+            <div>
+                @Html.DisplayFor(m => m.PrimaryCampaignSourceName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Stage ")
+            <div>
+                @Html.DisplayFor(m => m.StageName, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class=" col-lg-4">
+            @Html.Label("Budget Confirmed")
+            <div>
+                @Html.Label(Model.BudgetConfirmed ? "Yes" : "No", new { style = "font-weight:100" })
+
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Discovery Completed")
+            <div>
+                @Html.Label(Model.DiscoveryCompleted ? "Yes" : "No", new { style = "font-weight:100" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Probability")
+            <div>
+                @Html.DisplayFor(m => m.Probability, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class=" col-lg-4">
+            @Html.Label("ROI Analyses Completed")
+            <div>
+                @Html.Label(Model.ROIAnalysisCompleted ? "Yes" : "No", new { style = "font-weight:100" })
+            </div>
+        </div>
+    </div>
+    <div class="form-Croup row">
+        <div class=" col-lg-4">
+            @Html.Label("Loss Reason ")
+            <div>
+                @Html.DisplayFor(m => m.LossReasonName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Lead Source ")
+            <div>
+                @Html.DisplayFor(m => m.LeadSourceName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Amount")
+            <div>
+                @Html.DisplayFor(m => m.Amount, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <hr />
+    <h3>Additional Information</h3>
+    <br />
+    <div class="form-group row">
+        <div class="col-lg-8">
+            @Html.Label("NextStep")
+            <div>
+                @Html.DisplayFor(m => m.NextStep, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-8">
+            @Html.Label("Description")
+            <div>
+                @Html.DisplayFor(m => m.Description, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-6">
+            @Html.Label("Created By ")
+            <div>
+                @Html.DisplayFor(m => m.CreatedByName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @Html.Label("Created On")
+            <div>
+                @Html.DisplayFor(m => m.CreatedOn, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-6">
+            @Html.Label("Modified By")
+            <div>
+                @Html.DisplayFor(m => m.ModifiedByName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @Html.Label("Modified On")
+            <div>
+                @Html.DisplayFor(m => m.ModifiedOn, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

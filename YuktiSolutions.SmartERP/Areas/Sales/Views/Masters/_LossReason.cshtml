@@ -1,0 +1,14 @@
+﻿@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.MasterEntriesListItem>().Name("LossReasonList")
+.Columns(cols =>
+{
+    cols.Bound(c => c.Name).FooterTemplate("<input type='text' id = 'footerLossReason'class='k-textbox' placeholder='Enter Loss Reason' size='45'required=true />");
+    ;
+    cols.Command(command => { command.Edit(); command.Destroy(); }).Width(250).FooterTemplate("<a onclick='SaveLossReason()'><span class='glyphicon glyphicon-plus pull-right'></span></a>");
+})
+.Editable(editable => editable.Mode(GridEditMode.InLine))
+.DataSource(ds => ds.Ajax().Read(read => read.Action("MasterEntries_Read", "Masters", new { Area = "Sales", MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.LossReason }))
+.Events(e => e.Error("DataSourceError"))
+.Model(m => m.Id(e => e.ID))
+.Update(update => update.Action("MasterEntries_Update", "Masters", new { MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.LossReason }))
+.Destroy(destroy => destroy.Action("MasterEntries_Destroy", "Masters", new { Area = "Sales" })))
+)

@@ -1,0 +1,288 @@
+﻿@using YuktiSolutions.SmartERP.Areas.Sales.Models.Database
+@model YuktiSolutions.SmartERP.Areas.Sales.Models.Database.OpportunityModel
+@{
+    ViewBag.Title = "Opportunity";
+}
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/smarterp/sales.opportunity.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+    <script src="~/Scripts/smarterp/user.administration.js"></script>
+}
+
+<h2>Opportunity</h2>
+<div>
+    <div class="pull-left">
+        <div class="form-group has-feedback">
+            <input type="text" class="form-control" id="txtSearch" placeholder="Search" onchange="BindGrid();" name="search">
+            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+        </div>
+    </div>
+    <div class="pull-right">
+        <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-primary"> Add New Opportunity</button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="glyphicon glyphicon-option-vertical"></span> More options
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="@Url.Action("Opportunities_Delete","Opportunity",new {Area="Sales" })" onclick="BulkAction(event, this, 'OpportunityList', 'Select at least one opportunity to delete.', 'Are you sure you want to delete the selected opportunities?');"> Delete Selected</a></li>
+                <li><a href="#" data-toggle="modal" data-target="#AssignUserModal"> Assign To</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.OpportunityListItem>().Name("OpportunityList")
+   .Filterable(e=>e.ToString().Trim(' '))
+    .Sortable()
+    .Pageable(pager => pager.PageSizes(new int[] {25,50,100,500,1000 }))
+    .Scrollable(e=>e.Height(300))
+    .Columns(cols =>
+    {
+        cols.Template(c => c.ID).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:ID#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"OpportunityList\")' />").Width(50).Lockable(false);
+        cols.Bound(c => c.OpportunityName).ClientTemplate(Html.ActionLink("#:OpportunityName#", "View", "Opportunity", new { area = "Sales", id = "#:ID#" }, new { }).ToHtmlString()).Width(200);
+        cols.Bound(c => c.OpportunityName).ClientTemplate(
+                        "<a  class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+                        "<ul class='dropdown-menu' role='menu'>" +
+                        "<li><a href='\\#' onclick='EditOpportunity(event,this);'>Edit</a></li>" +
+                        "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+                        "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Width(50).Lockable(false);
+        cols.Bound(c => c.AccountName).Width(200);
+        cols.Bound(c => c.StageName).Width(200);
+        cols.Bound(c => c.CloseDate).Width(200);
+        cols.Bound(c => c.LossReasonName).Width(200);
+        cols.Bound(c => c.Assigned_To).Width(200);
+        cols.Bound(c => c.NextStep).Width(200);
+        cols.Bound(c => c.Owner).Width(200);
+        cols.Bound(c => c.CreatedByName).Width(200);
+        cols.Bound(c => c.LeadSourceName).Hidden(true).Width(200);
+        cols.Bound(c => c.Probability).Hidden(true).Width(200);
+        cols.Bound(c => c.Amount).Hidden(true).Width(200);
+        cols.Bound(c => c.Description).Hidden(true);
+        cols.Bound(c => c.PrimaryCampaignSourceName).Hidden(true);
+        cols.Bound(c => c.ModifiedByName).Width(200);
+
+    }).DataSource(ds => ds.Ajax().Read(read => read.Action("Opportunity_Read", "Opportunity", new { Area = "Sales" }).Data("GetAdditionalData")).PageSize(25))
+
+
+)
+
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            @using (Ajax.BeginForm("SaveOpportunity", "Opportunity", new { }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnOpportunitySaved" }, new { id = "opportunityForm" }))
+            {
+                @Html.HiddenFor(m => m.ID)
+                @Html.HiddenFor(m=> m.CloseDate)
+                <div class="modal-body">
+                    <button type="button" class="glyphicon glyphicon-remove" onclick="OnResetData()" style="color:blue;float:right;padding: 0;border: none;background: none;outline:none;" data-dismiss="modal"></button>
+                    <h3>Opportunity Information</h3>
+                    <div class="container-fluid">
+                        <div class="form-horizontal ">
+                            <p>Field Marked * are mandatory</p>
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            <div class="form-group">
+                                <div class="row ">
+                                    <div class="col-lg-8">
+                                        @Html.Label("Opportunity*")
+                                        @Html.EditorFor(model => model.OpportunityName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Opportunity Name" } })
+                                        @Html.ValidationMessageFor(model => model.OpportunityName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="form-group has-feedback">
+                                        @Html.Label("Account *")
+                                        @Html.DropDownListFor(model => model.Account, AccountManager.GetAccounts().Select(x => new SelectListItem
+                                        {
+                                            Text = x.AccountName,
+                                            Value = x.ID.ToString()
+                                        }), "Select Account Name", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Account, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    @Html.Label("Close Date *")
+                                    @(Html.Kendo().DatePicker()
+                                    .Events(e=> e.Change("SetCloseDate"))
+                                    .Name("closeDatePicker")
+                                    .Value(DateTime.Now)
+                                )
+                                    @Html.ValidationMessageFor(model => model.CloseDate, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        @Html.Label("Opportunity Type *")
+                                        @Html.DropDownListFor(model => model.OpportunityType, MasterEntriesManager.GetMasterEntries(MasterEntryType.OpportunityType).Select(x => new SelectListItem
+                                        {
+                                            Text = x.Name,
+                                            Value = x.ID.ToString()
+                                        }), "Select Opportunity", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.OpportunityType, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        @Html.Label("Primary Campaign Source *")
+                                        @Html.DropDownListFor(model => model.PrimaryCampaignSource, MasterEntriesManager.GetMasterEntries(MasterEntryType.CampaignSource).Select(x => new SelectListItem
+                                        {
+                                            Text = x.Name,
+                                            Value = x.ID.ToString()
+                                        }), "Select Primary Campaign Source", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.PrimaryCampaignSource, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        @Html.Label("Stage *")
+                                        @Html.DropDownListFor(model => model.Stage, MasterEntriesManager.GetMasterEntries(MasterEntryType.Stage).Select(x => new SelectListItem
+                                        {
+                                            Text = x.Name,
+                                            Value = x.ID.ToString()
+                                        }), "Select Stage", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Stage, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="checkbox-inline">
+                                        @Html.CheckBoxFor(model => model.BudgetConfirmed)
+                                        @Html.ValidationMessageFor(model => model.BudgetConfirmed, "", new { @class = "text-danger" })
+                                        @Html.Label("Budget Confirmed")
+                                        <br />
+                                        @Html.CheckBoxFor(model => model.ROIAnalysisCompleted)
+                                        @Html.ValidationMessageFor(model => model.ROIAnalysisCompleted, "", new { @class = "text-danger"})
+                                        @Html.Label("ROIAnalysis Completed")
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+
+                                    <div class="checkbox-inline">
+                                        @Html.CheckBoxFor(model => model.DiscoveryCompleted)
+                                        @Html.ValidationMessageFor(model => model.DiscoveryCompleted, "", new { @class = "text-danger" })
+                                        @Html.Label("Discovery Completed")
+                                    </div>
+                                </div>
+
+                                    <div class="col-lg-4">
+                                        @Html.Label("Probability(%)")
+                                        @Html.EditorFor(model => model.Probability, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Probability" } })
+                                        @Html.ValidationMessageFor(model => model.Probability, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        @Html.Label("Loss Reason *")
+                                        @Html.DropDownListFor(model => model.LossReason, MasterEntriesManager.GetMasterEntries(MasterEntryType.LossReason).Select(x => new SelectListItem
+                                   {
+                                       Text = x.Name,
+                                       Value = x.ID.ToString()
+                                   }), "Select Loss Reason", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.LossReason, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        @Html.Label("Lead Source *")
+                                        @Html.DropDownListFor(model => model.LeadSource, MasterEntriesManager.GetMasterEntries(MasterEntryType.LeadSources).Select(x => new SelectListItem
+                                   {
+                                       Text = x.Name,
+                                       Value = x.ID.ToString()
+                                   }), "Select Lead Source", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.LeadSource, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        @Html.Label("Amount")
+                                        @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Amount" } })
+                                        @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <hr />
+                            <div class="form-group">
+                                <h3>Additional Information</h3>
+
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        @Html.Label("Next Step")
+                                        @Html.EditorFor(model => model.NextStep, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter NextStep" } })
+                                        @Html.ValidationMessageFor(model => model.NextStep, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        @Html.Label("Description")
+                                        @Html.TextAreaFor(model => model.Description, new { @class = "form-control", @placeholder = "Enter Description" })
+                                        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                        <input type="submit" value="Save opportunity" class="btn btn-primary" />
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <button type="button" class="btn btn-default" onclick="OnResetData()" style="border: 1px solid #337ab7;color: #337ab7" data-dismiss="modal" aria-hidden="true">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                   </div>
+                    </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div id="AssignUserModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Assign Users</h4>
+            </div>
+            <div class="modal-body">
+                <div class="pull-left">
+                    <div class="form-group has-feedback">
+                        <input type="text" class="form-control" id="txtuserSearch" placeholder="Search" onchange="BindUserGrid();" name="search">
+                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                    </div>
+                </div><br /><hr /><div>
+                    @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Models.ApplicationUser>().Name("AspNetUsers")
+    .Pageable()
+    .Sortable()
+    .Filterable()
+    .Columns(cols=> {
+        cols.Bound(c => c.UserName).ClientTemplate("<a href='\\#' onclick='EditUserOpportunity(event,this)'>#:UserName#</a>");
+        cols.Bound(c => c.Email);
+        cols.Bound(c => c.PhoneNumber);
+         }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Users_Read","Users",new { Area=""}).Data("GetAdditionalUserData") )))
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

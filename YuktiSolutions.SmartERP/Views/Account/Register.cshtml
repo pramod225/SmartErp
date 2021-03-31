@@ -1,0 +1,54 @@
+﻿@model YuktiSolutions.SmartERP.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+    Layout = null;
+}
+
+
+<div class="container-fluid">
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-group", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group row">
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+        <div class="form-group col-lg-4">
+            @Html.LabelFor(m => m.UserName)
+
+            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group col-lg-4">
+            @Html.LabelFor(m => m.Email)
+
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        </div>
+        <div class="form-group col-lg-4">
+            @Html.LabelFor(m => m.Number)
+
+            @Html.TextBoxFor(m => m.Number, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="form-group col-lg-6">
+            @Html.LabelFor(m => m.Password)
+
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group col-lg-6">
+            @Html.LabelFor(m => m.ConfirmPassword)
+
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+        </div>
+
+    </div>
+    <div class="form-group">
+        <input type="submit" class="btn btn-primary " value="Save User" />
+
+    </div>
+}
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,164 @@
+﻿@model YuktiSolutions.SmartERP.Areas.Sales.Models.UI.AccountListItem
+
+@{
+    ViewBag.Title = "View";
+}
+<h3>@Html.ActionLink("Back", "Index")</h3>
+<center><h2>View Account</h2></center>
+<hr />
+
+<div class="container">
+    <div class="form-group row">
+        <div class="col-lg-8">
+
+            @Html.Label("Account ")
+            <div>
+                @Html.DisplayFor(m => m.AccountName, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            @Html.Label("Website")
+            <div>
+                @Html.DisplayFor(m => m.Website, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-4">
+            @Html.Label("Industry")
+            <div>
+                @Html.DisplayFor(m => m.IndustryName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Company Size")
+            <div>
+                @Html.DisplayFor(m => m.CompanySizeName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Phone Number")
+            <div>
+                @Html.DisplayFor(m => m.PhoneNumber, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class=" col-lg-4">
+            @Html.Label("GST Number")
+            <div>
+                @Html.DisplayFor(m => m.GSTNumber, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-4">
+        </div>
+        <div class="col-lg-4">
+            @Html.Label("Fax Number")
+            <div>
+                @Html.DisplayFor(m => m.FaxNumber, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <hr />
+    <h3>Address</h3>
+    <br />
+    <div class="form-group row">
+        <div class="col-lg-6">
+            @Html.Label("Billing Address Line1")
+            <div>
+                @Html.DisplayFor(m => m.BillingAddressLine1, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @Html.Label("Shipping Address Line1")
+            <div>
+                @Html.DisplayFor(m => m.ShippingAddressLine1, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-6">
+            @Html.Label("Billing Address Line2")
+            <div>
+                @Html.DisplayFor(m => m.BillingAddressLine2, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @Html.Label("Shipping Address Line2")
+            <div>
+                @Html.DisplayFor(m => m.ShippingAddressLine2, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-6">
+            @Html.Label("Billing City/State")
+            <div>
+                @Html.DisplayFor(m => m.BillingCityState, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @Html.Label("Shipping City/State")
+            <div>
+                @Html.DisplayFor(m => m.ShippingCityState, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-lg-3">
+            @Html.Label("Country")
+            <div>
+                @Html.DisplayFor(m => m.CountryName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Zip Code")
+            <div>
+                @Html.DisplayFor(m => m.ZipCode, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Shipping Country")
+            <div>
+                @Html.DisplayFor(m => m.CountryName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Shipping Zip Code")
+            <div>
+                @Html.DisplayFor(m => m.ShippingZipCode, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Created By")
+            <div>
+                @Html.DisplayFor(m => m.CreatedByName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Modified By ")
+            <div>
+                @Html.DisplayFor(m => m.ModifiedByName, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Created on")
+            <div>
+                @Html.DisplayFor(m => m.CreatedOn, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-lg-3">
+            @Html.Label("Modified on")
+            <div>
+                @Html.DisplayFor(m => m.ModifiedOn, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

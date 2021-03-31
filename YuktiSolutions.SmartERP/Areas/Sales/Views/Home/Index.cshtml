@@ -1,0 +1,136 @@
+﻿
+@{
+    ViewBag.Title = "Home";
+}
+<div class="row">
+    <div class="col-md-6 ">
+        <div class="panel">
+
+            @(Html.Kendo().Chart< YuktiSolutions.SmartERP.Areas.Sales.Models.UI.CountryWiseAccounts>()
+            .Name("chart")
+            .RenderAs(RenderingMode.Canvas)
+            .Title("Number of accounts in different country's")
+
+            .Legend(legend => legend.Visible(true).Position(ChartLegendPosition.Right)
+            )
+            .SeriesColors(new string[] { "#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#ffbf00", "#00ff40", "#0040f", "#ff0080", "#1a0000", "#808080","#ffff00","#ff0000","#ffff8f","#384c8f","#384c00" })
+            .Series(series => series
+            .Pie(model => model.NoOfAccounts, model => model.CountryName)
+            .Labels(labels => labels
+            .Template("#= category #: \n #= kendo.format('{0:P}', percentage)#")
+            .Background("transparent")
+            .Visible(true)
+            )
+
+            )
+            .Tooltip(tooltip => tooltip
+            .Visible(true)
+            .Format("{0:N0}")
+            .Template("#= category # - #= kendo.format('{0:P}', percentage)#")
+            )
+            .DataSource(ds=> ds
+            .Read(read=> read.Action("AccountsByCountries_Read", "Home",new { Area="Sales"})))
+            )
+        </div>
+        </div>
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Relative Account</h3>
+                </div>
+                @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.EventActivityListItem>
+           ().Name("ReletedAccountts")
+           .Filterable()
+           .Sortable()
+           .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+           .Scrollable(e=>e.Height(200))
+           .Columns(cols=>
+           {
+
+               cols.Bound(c => c.EndDateTime).Width(200);
+               cols.Bound(c => c.RelatedAccounts).Width(200);
+           }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Related_Event_Read", "Home",new { Area="Sales"})).PageSize(25)))
+            
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Today Events</h3>
+                </div>
+                @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.EventActivityListItem>
+    ().Name("EventList")
+    .Sortable()
+    .Scrollable(e=>e.Height(200))
+    .Pageable()
+    .Columns(cols=>
+    {
+        cols.Bound(c => c.Subject).Width(200).Lockable(false);
+        cols.Bound(c => c.Description).Width(200);
+        cols.Bound(c => c.StartDateTime).Width(200);
+        cols.Bound(c => c.EndDateTime).Width(200);
+        cols.Bound(c => c.Location).Width(200);
+    }).DataSource(ds=> ds.Ajax() .Read(read=> read.Action("Event_Read","Home",new { Area="Sales"}))))
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Recent Contacts</h3>
+                </div>
+
+                @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.EmailActivityListItem>
+    ().Name("ContactsActivityList")
+    .Sortable()
+    .Scrollable(e=>e.Height(200))
+    .Pageable()
+    .Columns(cols=>
+    {
+        cols.Bound(c => c.Subject).Width(200);
+        cols.Bound(c => c.Description).Width(200);
+
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Email_Read", "Home",new { Area="Sales"}))))
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Today Tasks</h3>
+                </div>
+                @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.TaskActivityListItem>
+            ().Name("Task")
+            .Sortable()
+            .Pageable()
+            .Scrollable(e=>e.Height(200))
+            .Columns(cols =>{
+            cols.Bound(c => c.Subject).Width(200);
+            cols.Bound(c => c.Description).Width(200);
+            cols.Bound(c => c.DueDate).Width(200);
+            cols.Bound(c => c.Status).Width(200);
+    }).DataSource(ds => ds.Ajax().Read(read => read.Action("Task_Read", "Home", new { Area = "Sales" }))))
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Quarterly Sales Performance</h3>
+                </div>
+                @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.OpportunityListItem>().Name("OpportunityList")
+            .Sortable()
+            .Pageable()
+            .Scrollable(e => e.Height(200))
+            .Columns(cols =>{
+            cols.Bound(c => c.OpportunityName).Width(200);
+            cols.Bound(c => c.CloseDate).Width(200);
+    }).DataSource(ds => ds.Ajax().Read(read => read.Action("Opportunity_Read", "Opportunity", new { Area = "Sales" }))))
+            </div>
+        </div>
+    </div>
+</div>
+   
+            
+     
+

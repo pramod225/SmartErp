@@ -1,0 +1,135 @@
+﻿@model YuktiSolutions.SmartERP.Models.UserViewModel
+
+@{
+    ViewBag.Title = "Users";
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+    <script src="~/Scripts/smarterp/user.administration.js"></script>
+    <script src="~/Scripts/smarterp/sales.account.js"></script>
+}
+
+
+<h2>Users</h2>
+<br />
+
+<div>
+    <div class="pull-left">
+        <div class="form-group has-feedback">
+            <input type="text" class="form-control" id="txtuserSearch" placeholder="Search" onchange="BindUserGrid();" name="search">
+            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+        </div>
+    </div>
+    <div class="pull-right">
+        <button type="button" data-toggle="modal" data-target="#myModal" onclick="Resetform();" class="btn btn-info"><span class="glyphicon glyphicon-plus">&nbsp;</span>Add New User</button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="glyphicon glyphicon-option-vertical">&nbsp;</span>More Options
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="@Url.Action("UsersDelete","Users")" onclick="BulkAction(event, this, 'AspNetUsers', 'Select at least one user to delete.', 'Are you sure you want to delete the selected user(s)?');"> Delete Selected</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Models.ApplicationUser>().Name("AspNetUsers")
+        .Pageable()
+        .Sortable()
+        .Filterable()
+    .Columns(cols=> {
+        cols.Template(c => c.Id).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"AspNetUsers\")' />");
+        cols.Bound(c => c.UserName);
+        cols.Bound(c => c.UserName).ClientTemplate(
+                        "<a  class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+                        "<ul class='dropdown-menu' role='menu'>" +
+                        "<li><a href='\\#' onclick='EditCurrentUser(event,this);'>Edit</a></li>" +
+                        "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Filterable(false).Sortable(false);
+        cols.Bound(c => c.Email);
+        cols.Bound(c => c.PhoneNumber);
+
+
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Users_Read","Users").Data("GetAdditionalUserData") ))
+)
+
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">User Information</h4>
+            </div>
+            <div class="modal-body">
+              
+                @using (Ajax.BeginForm("StoreUser", "Users", new { }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnUserSaved" }, new { id = "userForm" }))
+                {
+
+                    @Html.AntiForgeryToken()
+
+
+
+                    <div class="form-group row">
+                        @Html.HiddenFor(m => m.Id)
+                        <div class="form-group col-lg-4">
+                            @Html.LabelFor(m => m.UserName)
+
+                            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group col-lg-4">
+                            @Html.LabelFor(m => m.Email)
+
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-lg-4">
+                            @Html.LabelFor(m => m.Number)
+
+                            @Html.TextBoxFor(m => m.Number, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Number, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="form-group col-lg-12">
+                            @(Html.Kendo().CheckBox().Name("SetPass").Label("Set New Password"))
+
+                        </div>
+
+                    </div>
+                    <div class="form-group row">
+                        <div class="form-group col-lg-4">
+                            @Html.LabelFor(m => m.Password)
+
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group col-lg-4">
+                            @Html.LabelFor(m => m.ConfirmPassword)
+
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                        </div>
+
+
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-primary " onclick="CheckPass(event)" value="Save User" />
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,19 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section AreaName{
+    <a href="@Url.Action("Index","Home",new { Area="Sales" })" class="app-name">Sales</a>
+}
+@section scripts{
+     @RenderSection("scripts",false)
+    }
+@section AreaMenu{
+    <ul class="nav navbar-nav">
+        <li>@Html.ActionLink("Accounts", "Index", "Accounts", new { area = "Sales" }, new { })</li>
+        <li>@Html.ActionLink("Contacts", "Index", "Contacts", new { area = "Sales" }, new { })</li>
+        <li>@Html.ActionLink("Leads", "Index", "Leads", new { area = "Sales" }, new { })</li>
+        <li>@Html.ActionLink("Opportunities", "Index", "Opportunity", new { area = "Sales" }, new { })</li>
+        <li>@Html.ActionLink("Activities", "Index", "Activities", new { area = "Sales" }, new { })</li>
+    </ul>
+}
+@RenderBody()

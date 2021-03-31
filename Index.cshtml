@@ -1,0 +1,317 @@
+﻿@using YuktiSolutions.SmartERP.Areas.Sales.Models.Database
+@model YuktiSolutions.SmartERP.Areas.Sales.Models.Database.AccountModel
+@{
+    ViewBag.Title = "Accounts";
+}
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/smarterp/sales.account.js"></script>
+    <script src="~/Scripts/smarterp/user.administration.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+
+}
+<h2>Accounts</h2>
+<div>
+    <div class="pull-left">
+        <div class="form-group has-feedback">
+            <input type="text" class="form-control" id="txtSearch" placeholder="Search" onchange="BindGrid();" name="search">
+            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+        </div>
+    </div>
+    <div class="pull-right">
+        <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-primary"> Add New Account</button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="glyphicon glyphicon-option-vertical"></span> More options
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="@Url.Action("Accounts_Delete","Accounts",new {Area="Sales" })" onclick="BulkAction(event, this, 'AccountList', 'Select at least one account to delete.', 'Are you sure you want to delete the selected accounts?');"> Delete Selected</a></li>
+                <li><a href="#" data-toggle="modal" data-target="#AssignUserModal"> Assign To</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+</div>
+@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.AccountListItem>().Name("AccountList")
+         .Selectable(s => s.Mode(GridSelectionMode.Single))
+         .Pageable()
+         .Events(e=> e.Change("OnAccountSelected"))
+        .Columns(cols=> {
+            cols.Bound(c=>c.ID).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:ID#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"AccountList\")' />");
+            cols.Bound(c => c.AccountName).ClientTemplate("<a href='\\#' onClick='EditAccount(this)'>#:AccountName#</a>");
+            cols.Bound(c => c.PhoneNumber);
+            cols.Bound(c => c.CountryName);
+            cols.Bound(c => c.IndustryName);
+            cols.Bound(c => c.Assigned_To);
+            cols.Bound(c => c.Website);
+            cols.Bound(c => c.FaxNumber);
+            cols.Bound(c => c.CompanySizeName);
+            cols.Bound(c => c.GSTNumber).Hidden(true);
+            cols.Bound(c => c.BillingAddressLine1).Hidden(true);
+            cols.Bound(c => c.BillingAddressLine2).Hidden(true);
+            cols.Bound(c => c.BillingCityState).Hidden(true);
+            cols.Bound(c => c.ShippingAddressLine1).Hidden(true);
+            cols.Bound(c => c.ShippingAddressLine2).Hidden(true);
+            cols.Bound(c => c.ShippingCityState).Hidden(true);
+            cols.Bound(c => c.ZipCode).Hidden(true);
+            cols.Bound(c => c.ShippingZipCode).Hidden(true);
+            cols.Bound(c => c.ShippingCountry).Hidden(true);
+        }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Accounts_Read","Accounts",new { Area="Sales" }).Data("GetAdditionData")))
+)
+<div>
+    <div>
+        <p class="help-block">Please select an account to see its details.</p>
+    </div>
+</div>
+@(Html.Kendo().TabStrip()
+    .Name("tabstrip")
+    .Animation(animation =>
+    animation.Open(effect =>
+    effect.Fade(FadeDirection.In)))
+    .Items(tabstrip =>
+    {
+    tabstrip.Add().Text("Contacts")
+    .Selected(true)
+    .Content(@<text>
+    @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.ContactListItem>().Name("ContactsList")
+        .Sortable()
+        .Pageable()
+        .Filterable()
+        .Columns(cols=>
+        {
+            cols.Template(c => c.Id).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"ContactsList\")' />");
+            cols.Bound(c => c.Name);
+            cols.Bound(c => c.EmailId).Width("300px").ClientTemplate("<a href='\\#' onClick='GetAccountDetails(this)'>#:EmailId#</a>");
+            cols.Bound(c => c.MobileNo);
+            cols.Bound(c => c.PhoneNo);
+            cols.Bound(c => c.Extension);
+            cols.Bound(c => c.SkypeId);
+            cols.Bound(c => c.WhatsApp);
+            cols.Bound(c => c.AccountName).Hidden(true);
+            cols.Bound(c => c.LinkdinProfile);
+            cols.Bound(c => c.Designation);
+        })
+    .DataSource(ds=> ds.Ajax()
+    .Read(read=> read.Action("ContactsByAccount_Read", "Contacts",new { Area="Sales"}).Data("GetAccountDetails"))))
+
+    </text>);
+    })
+    )
+
+
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Ajax.BeginForm("SaveAccount", "Accounts", new { }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnAccountSaved" }, new { id = "accountForm" }))
+            {
+                @Html.HiddenFor(model => model.ID)
+
+                <div class="modal-body">
+                    <button type="button" class="glyphicon glyphicon-remove" onclick="ResetData()" style="color: #337ab7;float:right;padding: 0;border: none;background: none;outline:none;" data-dismiss="modal"></button>
+                    <h4>Account Information</h4>
+                    <div class="form-horizontal ">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="container-fluid">
+                            <div class="form-group row">
+                                <div class="col col-lg-8">
+                                    @Html.Label("Name")
+                                    @Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Name" } })
+                                    @Html.ValidationMessageFor(model => model.AccountName, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-offset-8">
+                                    @Html.Label("Website")
+                                    @Html.EditorFor(model => model.Website, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Email" } })
+                                    @Html.ValidationMessageFor(model => model.Website, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col col-lg-4">
+                                    @Html.LabelFor(x => x.Industry)
+                                    @Html.DropDownListFor(model => model.Industry, MasterEntriesManager.GetMasterEntries(MasterEntryType.Industry).Select(x => new SelectListItem
+                               {
+                                   Text = x.Name,
+                                   Value = x.ID.ToString()
+                               }), "Select Industry", new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Industry, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-lg-4">
+                                    @Html.LabelFor(x => x.CompanySize)
+                                    @Html.DropDownListFor(model => model.CompanySize, MasterEntriesManager.GetMasterEntries(MasterEntryType.CompanySize).Select(x => new SelectListItem
+                               {
+                                   Text = x.Name,
+                                   Value = x.ID.ToString()
+                               }), "Select Size", new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.CompanySize, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-offset-8">
+                                    @Html.Label("Phone Number")
+                                    @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Phone" } })
+                                    @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col col-lg-5">
+                                    @Html.Label("GST/VAT Number")
+                                    @Html.EditorFor(model => model.GSTNumber, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter password" } })
+                                    @Html.ValidationMessageFor(model => model.GSTNumber, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-offset-8">
+                                    @Html.Label("Fax Number")
+                                    @Html.EditorFor(model => model.FaxNumber, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter password" } })
+                                    @Html.ValidationMessageFor(model => model.FaxNumber, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <hr />
+                            <h5>Address</h5>
+                            <div class="form-group row">
+                                <div class="col-lg-6">
+                                    @Html.Label("Billing Address Line1")
+                                    @Html.EditorFor(model => model.BillingAddressLine1, new { htmlAttributes = new { @class = "form-control", @placeholder = "Address Line1", @id = "BillingAddress1" } })
+                                    @Html.ValidationMessageFor(model => model.BillingAddressLine1, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-offset-6">
+                                    @Html.Label("Shipping Address Line1")
+                                    @Html.EditorFor(model => model.ShippingAddressLine1, new { htmlAttributes = new { @class = "form-control", @placeholder = "Address line1", @id = "ShippingAddress1" } })
+                                    @Html.ValidationMessageFor(model => model.ShippingAddressLine1, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-lg-6">
+                                    @Html.Label("Billing Address Line2")
+                                    @Html.EditorFor(model => model.BillingAddressLine2, new { htmlAttributes = new { @class = "form-control", @placeholder = "Address Line2", @id = "BillingAddress2" } })
+                                    @Html.ValidationMessageFor(model => model.BillingAddressLine2, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-offset-6">
+                                    @Html.Label("Shipping Address Line2")
+                                    @Html.EditorFor(model => model.ShippingAddressLine2, new { htmlAttributes = new { @class = "form-control", @placeholder = "Address Line2", @id = "ShippingAddress2" } })
+                                    @Html.ValidationMessageFor(model => model.ShippingAddressLine2, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-lg-6">
+                                    @Html.Label("City/State")
+                                    @Html.EditorFor(model => model.BillingCityState, new { htmlAttributes = new { @class = "form-control", @placeholder = "Address Line2", @id = "CityState" } })
+                                    @Html.ValidationMessageFor(model => model.BillingCityState, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-offset-6">
+                                    @Html.Label("Shipping-City/State")
+                                    @Html.EditorFor(model => model.ShippingCityState, new { htmlAttributes = new { @class = "form-control", @placeholder = "Address Line2", @id = "ShippingCityState" } })
+                                    @Html.ValidationMessageFor(model => model.ShippingCityState, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.LabelFor(x => x.Country)
+                                    @Html.DropDownListFor(model => model.Country, CountryManager.GetCountries().Select(x => new SelectListItem
+                               {
+                                   Text = x.CountryName,
+                                   Value = x.ID.ToString()
+                               }), "Select Country", new
+                                    {
+                                        @class = "form-control",
+                                   @id = "Country"
+                                    })
+                                    @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.Label("Zip Code")
+                                    @Html.EditorFor(model => model.ZipCode, new
+                                    {
+                                        htmlAttributes = new
+                                        {
+                                            @class = "form-control",
+                                            @placeholder = "Zip Code",
+                                   @id = "ZipCode"
+                                        }
+                                    })
+                                    @Html.ValidationMessageFor(model => model.ZipCode, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.LabelFor(x => x.ShippingCountry)
+                                    @Html.DropDownListFor(model => model.Country, CountryManager.GetCountries().Select(x => new SelectListItem
+                               {
+                                   Text = x.CountryName,
+                                   Value = x.ID.ToString()
+                               }), "Select Shipping Country", new { @class = "form-control", @id = "ShippingCountry" })
+                                    @Html.ValidationMessageFor(model => model.ShippingCountry, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.Label("Shipping Zip Code")
+                                    @Html.EditorFor(model => model.ShippingZipCode, new
+                                    {
+                                        htmlAttributes = new
+                                        {
+                                            @class = "form-control",
+                                            @placeholder = "Zip Code",
+                                   @id = "ShippingZipCode"
+                                        }
+                                    })
+                                    @Html.ValidationMessageFor(model => model.ShippingZipCode, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <br />
+                            <div>
+                                <input type="checkbox" id="select_all" onclick="BillingAddress()" />
+                                @*@Html.CheckBox("selected", new { @id = "select_all" })*@
+                                Shipping Address is same as billing address.
+                            </div>
+                            <br />
+                            <div class="form-group row ">
+                                <div class="col-md-12">
+                                    <input type="submit" value="Save Account" class="btn btn-primary col-lg-push-6" />
+                                    <button type="button" class="btn btn-default col-lg-push-4" data-dismiss="modal" aria-hidden="true" onclick="ResetData()" style="outline:none;margin: 5px;border: 2px solid #337ab7;color: #337ab7;">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div id="AssignUserModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Assign Users</h4>
+            </div>
+            <div class="modal-body">
+                <div class="pull-left">
+                    <div class="form-group has-feedback">
+                        <input type="text" class="form-control" id="txtuserSearch" placeholder="Search" onchange="BindUserGrid();" name="search">
+                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                    </div>
+                </div><br /><hr /><div>
+                    @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Models.ApplicationUser>().Name("AspNetUsers")
+        .Pageable()
+        .Sortable()
+        .Filterable()
+    .Columns(cols=> {
+       
+        cols.Bound(c => c.UserName).ClientTemplate("<a href='\\#' onclick='EditUser(this)'>#:UserName#</a>");
+        cols.Bound(c => c.Email);
+        cols.Bound(c => c.PhoneNumber);
+        cols.Bound(c => c.Roles);
+
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Users_Read","Users", new { Area=""}).Data("GetAdditionalUserData") ))
+)
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+

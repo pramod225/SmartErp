@@ -1,0 +1,231 @@
+﻿@using YuktiSolutions.SmartERP.Areas.Sales.Models.Database
+@using YuktiSolutions.SmartERP.Areas.Sales.Models.UI
+@model YuktiSolutions.SmartERP.Areas.Sales.Models.Database.ContactModel
+@{
+    ViewBag.Title = "Contacts";
+}
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/smarterp/sales.contact.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+    <script src="~/Scripts/smarterp/user.administration.js"></script>
+    <script src="~/Scripts/smarterp/sales.activities.js"></script>
+}
+<h2>Contacts</h2>
+<div class="pull-left">
+    <div class="form-group has-feedback">
+        <input type="text" class="form-control" id="txtSearch" placeholder="Search" onchange="BindGrid();" name="search">
+        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+    </div>
+</div>
+<div class="pull-right">
+    <button type="button" data-toggle="modal" data-target="#contactModal" class="btn btn-primary"> Add New Contact</button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-option-vertical"></span> More options
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="@Url.Action("Contacts_Delete","Contacts",new {Area="Sales" })" onclick="BulkAction(event, this, 'ContactsList', 'Select at least one contact to delete.', 'Are you sure you want to delete the selected contacts?');"> Delete Selected</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#AssignUserModal"> Assign To</a></li>
+        </ul>
+    </div>
+</div>
+<div class="clearfix"></div>
+@(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.ContactListItem>
+    ().Name("ContactsList")
+    .Sortable()
+    .Filterable()
+    .Scrollable(e=>e.Height(300))
+    
+    .Pageable(pager => pager.PageSizes(new int[] { 25, 50, 100, 500, 1000 }))
+    .Columns(cols=>
+    {
+        cols.Template(c => c.Id).ClientTemplate("<input type='checkbox' class='checked-item' data-id='#:Id#' />").HeaderTemplate("<input type='checkbox' class='chkAll' onclick='GridCheckUncheck(this,\"ContactsList\")' />").Width(50).Lockable(false);
+        cols.Bound(c => c.TitleName).Hidden(true);
+        cols.Bound(c => c.Name).ClientTemplate(Html.ActionLink("#:Name#", "View", "Contacts", new { area = "Sales", id = "#:Id#" }, new { }).ToHtmlString()).Width(200);
+        cols.Bound(c=>c.Name).ClientTemplate(
+    "<a class='btn btn-sm dropdown-toggle' data-toggle='dropdown'><i class='glyphicon glyphicon-option-vertical'></i></a>" +
+    "<ul class='dropdown-menu' role='menu'>" +
+        "<li><a href='\\#' onclick='EditContact(event,this);'>Edit</a></li>" +
+        "<li><a href='\\#' onclick='activateRecord();'>Assigned</a></li>" +
+        "<li><a href='\\#' onclick='OnEmailSave(event,this)'>Email</a></li>" +
+        "<li><a href='\\#' onclick='OnTaskSave(event,this)'>Task</a></li>" +
+        "<li><a href='\\#' onclick='OnCallSave(event,this)'>Call</a></li>" +
+        "<li><a href='\\#' onclick='OnEventSave(event,this)'>Event<a></li>" +
+       "</ul>").HtmlAttributes(new { @class = "dropdown" }).Title("").Filterable(false).Width(50).Lockable(false);
+        cols.Bound(c => c.EmailId).Width(300);
+        cols.Bound(c => c.MobileNo).Width(200);
+        cols.Bound(c => c.PhoneNo).Width(200);
+        cols.Bound(c => c.Extension).Width(150);
+        cols.Bound(c => c.Assigned_To).Width(200);
+        cols.Bound(c => c.SkypeId).Width(200);
+        cols.Bound(c => c.WhatsApp).Width(200);
+        cols.Bound(c => c.AccountName).Width(200);
+        cols.Bound(c => c.Designation).Width(200);
+        cols.Bound(c => c.CreatedByName).Width(200);
+        cols.Bound(c => c.ModifiedByName).Width(200);
+    }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Contacts_Read","Contacts",new { Area="Sales"}).Data("GetAdditionData")).PageSize(25)))
+
+@Html.Partial("_EmailView", new EmailActivityListItem { Id = Guid.NewGuid() })
+@Html.Partial("_CallView", new CallActivityListItem { Id = Guid.NewGuid() })
+@Html.Partial("_EventView", new EventActivityListItem { Id = Guid.NewGuid() })
+@Html.Partial("_TaskView", new TaskActivityListItem { Id = Guid.NewGuid() })
+
+<div id="contactModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Ajax.BeginForm("SaveContact", "Contacts",  new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnContactSaved" }, new { id = "contactForm" }))
+            {
+                @Html.HiddenFor(model => model.Id)
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div>
+                            <button class="glyphicon glyphicon-remove" style="color: #337ab7;float: right;outline:none;padding: 0;border: none;background: none;" data-dismiss="modal" onclick="OnResetData()"></button>
+                        </div>
+                        <h2>Contact Information</h2>
+                        <p>Fields Marked  *  are Mandatory</p>
+                        <div class="row">
+                            <div class="col-md-12 ">
+                                <div class="form-group row">
+                                    <div class="col-md-8">
+                                        @Html.LabelFor(x => x.Account)
+                                        @Html.DropDownListFor(model => model.Account, AccountManager.GetAccounts().Select(x => new SelectListItem { Text = x.AccountName, Value = x.ID.ToString() }), "Select  Account Name", new { @Class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Account, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8 ">
+                                <div class="form-group row">
+                                    <div class="col-md-2">
+                                        @Html.LabelFor(x => x.Title)
+                                        @Html.DropDownListFor(model => model.Title, MasterEntriesManager.GetMasterEntries(MasterEntryType.Title).Select(x => new SelectListItem { Text = x.Name, Value = x.ID.ToString() }), "Title", new { @Class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-5 ">
+                                        @Html.Label("First Name*")
+                                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter First Name" } })
+                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-5 ">
+                                        @Html.Label("Last Name*")
+                                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control", @placeholder = " Enter Last Name" } })
+                                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-6">
+                                        @Html.Label("Designation")
+                                        @Html.EditorFor(model => model.Designation, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Designation" } })
+                                        @Html.ValidationMessageFor(model => model.Designation, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        @Html.Label("Mobile Number")
+                                        @Html.EditorFor(model => model.MobileNo, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Mobile Number" } })
+                                        @Html.ValidationMessageFor(model => model.MobileNo, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        @Html.Label("Email")
+                                        @Html.EditorFor(model => model.EmailId, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Email ID" } })
+                                        @Html.ValidationMessageFor(model => model.EmailId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group row">
+                                    <div class="col-md-11">
+                                        @Html.Label("Skype")
+                                        @Html.EditorFor(model => model.SkypeId, new { htmlAttributes = new { @class = "form-control", @placeholder = " Enter Skype ID" } })
+                                        @Html.ValidationMessageFor(model => model.SkypeId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-7">
+                                        @Html.Label("Phone Number")
+                                        @Html.EditorFor(model => model.PhoneNo, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Phone " } })
+                                        @Html.ValidationMessageFor(model => model.PhoneNo, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        @Html.LabelFor(Model => Model.Extension)
+                                        @Html.EditorFor(model => model.Extension, new { htmlAttributes = new { @class = "form-control", @placeholder = "Extension" } })
+                                        @Html.ValidationMessageFor(model => model.Extension, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-11 ">
+                                        @Html.Label("WhatsApp")
+                                        @Html.EditorFor(model => model.WhatsApp, new { htmlAttributes = new { @class = "form-control", @placeholder = " Enter WhatsApp " } })
+                                        @Html.ValidationMessageFor(model => model.WhatsApp, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <hr />
+                                <h3>Other Details</h3>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        @Html.Label("LinkedIn Profile")
+                                        @Html.EditorFor(model => model.LinkdinProfile, new { htmlAttributes = new { @class = "form-control", @placeholder = " Enter Linkedin Profile" } })
+                                        @Html.ValidationMessageFor(model => model.LinkdinProfile, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group row ">
+                                    <div class="col-md-12">
+                                        <input type="submit" value="Save Contact" class="btn btn-primary col-lg-push-6" />
+                                        <button type="button" class="btn btn-default col-lg-push-4" data-dismiss="modal" onclick="OnResetData()" aria-hidden="true" style="outline:none;margin: 5px;border: 2px solid #337ab7;color: #337ab7;">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div id="AssignUserModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Assign Users</h4>
+            </div>
+            <div class="modal-body">
+                <div class="pull-left">
+                    <div class="form-group has-feedback">
+                        <input type="text" class="form-control" id="txtuserSearch" placeholder="Search" onchange="BindUserGrid();" name="search">
+                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                    </div>
+                </div><br /><hr /><div>
+                @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Models.ApplicationUser>().Name("AspNetUsers")
+                   .Pageable()
+                   .Sortable()
+                   .Filterable()
+                   .Columns(cols=> {
+                  cols.Bound(c => c.UserName).ClientTemplate("<a href='\\#' onclick='EditUserContact(event,this)'>#:UserName#</a>");
+                  cols.Bound(c => c.Email);
+                  cols.Bound(c => c.PhoneNumber);
+         }).DataSource(ds=> ds.Ajax().Read(read=> read.Action("Users_Read","Users",new { Area=""}).Data("GetAdditionalUserData") )))
+
+             </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

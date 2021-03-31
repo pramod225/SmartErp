@@ -1,0 +1,104 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "MasterEntries";
+
+}
+@section scripts{
+    <script src="~/Scripts/smarterp/sales.masters.js"></script>
+    <script src="~/Scripts/smarterp/sales.common.js"></script>
+
+}
+@Styles.Render("~/Content/smarterp/sales-masterentries.css")
+
+<div class="k-tabstrip">
+    <h2>Master Entries</h2>
+    @(Html.Kendo().TabStrip()
+    .Name("tabstrip")
+    .Animation(animation =>
+    animation.Open(effect =>
+    effect.Fade(FadeDirection.In)))
+    .Items(tabstrip =>
+    {
+    tabstrip.Add().Text("Countries")
+    .Selected(true)
+    .Content(@<text>
+
+        @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.CountryListItem>
+            ().Name("CountriesList")
+            .Columns(cols =>
+            {
+            cols.Bound(c => c.CountryCode).FooterTemplate("<input type='text' id='footerCountryCode' placeholder='Enter Country Code' size='45' class='k-textbox' />");
+            cols.Bound(c => c.CountryName).FooterTemplate("<input type='text' id='footerCountryName' placeholder='Enter Country Name' size='45' class='k-textbox' />");
+            cols.Command(command => { command.Edit(); command.Destroy(); }).Width(250).FooterTemplate("<a onclick='SaveCountry()'><span class='glyphicon glyphicon-plus pull-right'></span></a>");
+            })
+            .Editable(editable => editable.Mode(GridEditMode.InLine))
+            .DataSource(ds => ds.Ajax().Read(read => read.Action("Countries_Read", "Masters", new { Area = "Sales" }))
+            .Events(e=> e.Error("DataSourceError"))
+            .Model(m => m.Id(e => e.ID))
+            .Update(update=> update.Action("Countries_Update", "Masters"))
+            .Destroy(destroy => destroy.Action("Countries_Destroy", "Masters", new { Area = "Sales" })))
+            )
+
+    </text>);
+
+    tabstrip.Add().Text("Industries")
+    .Content(@<text>
+
+        @(Html.Kendo().Grid<YuktiSolutions.SmartERP.Areas.Sales.Models.UI.MasterEntriesListItem>
+            ().Name("IndustriesList")
+            .Columns(cols =>
+            {
+            cols.Bound(c => c.Name).FooterTemplate("<input type='text' id='footerIndustryName' placeholder='Enter Industry Name' size='45'  class='k-textbox'/>");
+            ;
+            cols.Command(command => { command.Edit(); command.Destroy(); }).Width(250).FooterTemplate("<a onclick='IndustrySave()'><span class='glyphicon glyphicon-plus pull-right'></span></a>");
+            })
+            .Editable(editable => editable.Mode(GridEditMode.InLine))
+            .DataSource(ds => ds.Ajax().Read(read => read.Action("MasterEntries_Read", "Masters", new { Area = "Sales", MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.Industry }))
+            .Events(e => e.Error("DataSourceError"))
+            .Model(m => m.Id(e => e.ID))
+            .Update(update => update.Action("MasterEntries_Update", "Masters", new { Area = "Sales" , MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.Industry }))
+            .Destroy(destroy => destroy.Action("MasterEntries_Destroy", "Masters", new { Area = "Sales", MasterEntryType = YuktiSolutions.SmartERP.Areas.Sales.Models.Database.MasterEntryType.Industry })))
+            )
+    </text>);
+
+    tabstrip.Add().Text("Title")
+    .Content(@<text>
+        @Html.Partial("_Title")
+    </text>);
+
+    tabstrip.Add().Text("Campaign Source")
+    .Content(@<text>
+              @Html.Partial("_CampaignSource")
+             </text>);
+
+    tabstrip.Add().Text("Company Size")
+    .Content(@<text>
+             @Html.Partial("_CompanySize")
+             </text>);
+
+    tabstrip.Add().Text("Opportunity Ratings")
+    .Content(@<text>
+             @Html.Partial("_OpportunityRating")
+             </text>);
+    tabstrip.Add().Text("Opportunity Stage")
+    .Content(@<text>
+             @Html.Partial("_Stage")
+            </text>);
+    tabstrip.Add().Text("Opportunity Type")
+    .Content(@<text>
+             @Html.Partial("_OpportunityType")
+            </text>);
+
+    tabstrip.Add().Text("Lead Source")
+    .Content(@<text>
+              @Html.Partial("_LeadSource")
+             </text>);
+
+    tabstrip.Add().Text("Loss Reason")
+    .Content(@<text>
+             @Html.Partial("_LossReason")
+             </text>);
+         
+    })
+    )
+</div>
